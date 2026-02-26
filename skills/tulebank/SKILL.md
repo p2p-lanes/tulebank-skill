@@ -32,6 +32,7 @@ You can send Argentine pesos (ARS) to any bank account via CVU or ALIAS using th
 - **Fiat account activation**: Ripio only allows one enabled fiat account per customer. The `send` command automatically activates the target beneficiary's fiat account before sending. This may take a few extra seconds if the account was suspended.
 - After auto-sending, show the transaction hash and run `tulebank history` to confirm the record.
 - **Swaps**: Use `tulebank swap` to convert between USDC and wARS on Base. wARS converts 1:1 to ARS via off-ramp, so swapping USDC to wARS before sending can lock in the rate.
+- **ARS amounts → just use `--amount`, no `--token`**: When the user specifies an amount in ARS/pesos, ALWAYS use `--amount <n>` WITHOUT `--token`. The `--amount` value is in ARS. The CLI handles everything (picks wARS if available, or auto-swaps USDC→wARS). Never manually calculate USDC equivalents — it introduces rounding errors and the result won't be exact. Only use `--token USDC` when the user explicitly says they want to send USDC (not ARS).
 - **History**: After every send or swap, call `tulebank history` to confirm the transaction was recorded.
 
 ## Available commands
@@ -141,8 +142,10 @@ Shows local transaction history. Supports filtering by beneficiary (fuzzy), type
 
 ## Smart send rules
 
+- `--amount` is always in ARS (= wARS, 1:1). Do NOT convert to USDC manually.
 - When `--token` is omitted and `--amount` is given, the CLI auto-picks wARS (if balance sufficient) or swaps USDC→wARS first.
 - When `--token` is specified, sends that token directly (no auto-swap).
+- Example: user says "2300 pesos" → `--amount 2300` (NOT `--amount 1.57 --token USDC`).
 - `--to` accepts beneficiary names (e.g., `--to Pili`). If one match is found, it auto-resolves. If multiple, it errors with a list.
 - After every send, the transaction is recorded in `~/.tulebank/history.json`.
 
@@ -193,9 +196,10 @@ Shows local transaction history. Supports filtering by beneficiary (fuzzy), type
 ### Autonomous send (wallet configured)
 1. Ask: "Le mando 10,000 ARS a Pilar Castillo (pilarcastilloz)?"
 2. On confirmation: run `send --to pilarcastilloz --amount 10000 --yes`
-3. CLI auto-picks wARS or swaps USDC→wARS
-4. Show transaction hash from the response
-5. Run `history` to confirm the record
+   - `--amount` is ARS-denominated (10000 = 10,000 ARS). Do NOT convert to USDC.
+   - The CLI handles token selection: uses wARS if available, otherwise auto-swaps USDC→wARS.
+3. Show transaction hash from the response
+4. Run `history` to confirm the record
 
 ### Swap USDC to wARS before sending
 1. Run `wallet balance` to check USDC balance
