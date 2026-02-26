@@ -2,7 +2,7 @@
 name: tulebank
 description: TuleBank — check wallet balance, send ARS to any CVU/ALIAS, swap USDC/wARS, manage beneficiaries, and off-ramp crypto to Argentine bank accounts.
 user-invocable: true
-metadata: {"openclaw":{"requires":{"bins":["tulebank"]}}}
+metadata: {"clawdbot":{"requires":{"bins":["tulebank"]}}}
 ---
 
 You can send Argentine pesos (ARS) to any bank account via CVU or ALIAS using the `tulebank` CLI, which talks to a proxy that handles Ripio Ramps API credentials.
