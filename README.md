@@ -1,6 +1,6 @@
 # TuleBank Skill for Claude Code
 
-Send Argentine pesos (ARS) to any bank account via CVU or ALIAS, swap USDC/wARS on Base, and manage beneficiaries — all from Claude Code.
+Send Argentine pesos (ARS) to any bank account via CVU or ALIAS, fund wARS (or USDC) via ARS bank-transfer on-ramp, swap USDC/wARS on Base, and manage beneficiaries — all from Claude Code.
 
 ## Install
 
@@ -21,6 +21,7 @@ Then run `tulebank signup --email <email> --phone <phone>` to create your accoun
 ## What it does
 
 - **Send ARS** — off-ramp crypto to any Argentine bank account via Ripio Ramps
+- **On-ramp ARS** — create ARS -> wARS sessions (default) or ARS -> USDC orders to fund your wallet
 - **Swap tokens** — convert between USDC and wARS on Base
 - **Manage beneficiaries** — local address book with fuzzy search
 - **Wallet management** — create and manage a CDP smart wallet on Base
