@@ -1,6 +1,6 @@
 ---
 name: tulebank
-description: TuleBank — check wallet balance, send ARS to any CVU/ALIAS, swap USDC/wARS, manage beneficiaries, and move funds with ARS off-ramp/on-ramp flows.
+description: TuleBank — check wallet balance, process invoice inbox messages, send ARS to any CVU/ALIAS, swap USDC/wARS, manage beneficiaries, and move funds with ARS off-ramp/on-ramp flows.
 user-invocable: true
 metadata: {"clawdbot":{"requires":{"bins":["tulebank"]}}}
 ---
@@ -33,6 +33,7 @@ You can send Argentine pesos (ARS) to any bank account via CVU or ALIAS and fund
 - After auto-sending, show the transaction hash and run `tulebank history` to confirm the record.
 - **Swaps**: Use `tulebank swap` to convert between USDC and wARS on Base. wARS converts 1:1 to ARS via off-ramp, so swapping USDC to wARS before sending can lock in the rate.
 - **On-ramp (bank transfer)**: Use `tulebank onramp quote/create/status` for ARS -> wARS (default, session flow) or ARS -> USDC (order flow). Workstream 5 v1 supports `bank_transfer` only.
+- **Inbox (invoice intake)**: Use `tulebank inbox` commands to inspect inbound emails, process extraction, and manage trusted senders/rules before triggering any payment.
 - **ARS amounts → just use `--amount`, no `--token`**: When the user specifies an amount in ARS/pesos, ALWAYS use `--amount <n>` WITHOUT `--token`. The `--amount` value is in ARS. The CLI handles everything (picks wARS if available, or auto-swaps USDC→wARS). Never manually calculate USDC equivalents — it introduces rounding errors and the result won't be exact. Only use `--token USDC` when the user explicitly says they want to send USDC (not ARS).
 - **History**: After every send, swap, or on-ramp create, call `tulebank history` to confirm the transaction was recorded.
 
@@ -138,6 +139,40 @@ Creates an on-ramp flow using a fresh quote. `wARS` (default) creates a session;
 tulebank onramp status --transaction <transaction-id> [--asset wARS|USDC]
 ```
 
+### Inbox receiving address
+```
+tulebank inbox address
+```
+
+### List inbox messages
+```
+tulebank inbox list [--state <state>] [--classification <classification>]
+```
+
+### Show one inbox message
+```
+tulebank inbox show --id <message-id>
+```
+
+### Process one inbox message (extract payment details)
+```
+tulebank inbox process --id <message-id>
+```
+
+### Trusted sender management
+```
+tulebank inbox senders list
+tulebank inbox senders add --email <email> [--primary]
+tulebank inbox senders remove --email <email>
+```
+
+### Sender-specific extraction rules
+```
+tulebank inbox rules list
+tulebank inbox rules upsert --sender <email> --prompt "<text>"
+tulebank inbox rules remove --sender <email>
+```
+
 ### Check transaction limits
 ```
 tulebank limits
@@ -236,3 +271,10 @@ Shows local transaction history. Supports filtering by beneficiary (fuzzy), type
 3. Run `onramp create --amount 50000 --yes`
 4. Show session/order ID + payment instructions.
 5. Run `onramp status --transaction <id>` to track progress.
+
+### Paying from inbox extraction
+1. Run `inbox list` to locate candidate messages.
+2. Run `inbox process --id <message-id>` and review `classification`, `destination_value`, and `amount`.
+3. If `classification` is `payment_detected`, confirm payment details with the user.
+4. On explicit user approval, run `send --to <destination_value> --amount <amount> --yes`.
+5. Run `history` to confirm record creation.
